@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="main-title">
+            <i class="fas fa-address-book"></i> My Address Book
+        </h1>
+
+        <!-- 三栏布局 -->
+        <div class="main-layout">
+
+            <!-- 第一栏：添加联系人 -->
+            <div class="section-panel">
+                <h2><i class="fas fa-user-plus"></i> Add Contact</h2>
+                <div class="add-contact-form">
+                    <form action="/add_contact" method="POST">
+                        <div class="form-group">
+                            <label for="name">Name *</label>
+                            <input type="text" name="name" id="name" placeholder="Enter full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="text" name="phone" id="phone" placeholder="Phone number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" placeholder="Email address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="social_media">Social Media</label>
+                            <input type="text" name="social_media" id="social_media" placeholder="Social media profile">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <input type="text" name="address" id="address" placeholder="Physical address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Notes</label>
+                            <textarea name="notes" id="notes" placeholder="Add notes about this contact" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn">
+                            <i class="fas fa-plus-circle"></i> Add Contact
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 第二栏：联系人列表 -->
+            <div class="section-panel">
+                <h2>
+                    <i class="fas fa-users"></i> Your Contacts
+                    <span style="background: #4a90e2; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8em;">
+                        {{ contacts|length }}
+                    </span>
+                </h2>
+                <div class="contacts-container">
+                    {% set favorite_contacts = contacts|selectattr('favorite')|list %}
+                    {% set regular_contacts = contacts|rejectattr('favorite')|list %}
+
+                    {% if favorite_contacts %}
+                        <div class="favorite-contacts-title">
+                            <i class="fas fa-star"></i> Favorite Contacts ({{ favorite_contacts|length }})
+                        </div>
+
+                        {% for contact in favorite_contacts %}
+                            <div class="contact-card favorite-top">
+                                <div class="contact-header">
+                                    <div class="contact-name">
+                                        {{ contact.name }}
+                                    </div>
+                                    <a href="/favorite/{{ contact.id }}" class="favorite-star" title="Remove from favorites">
+                                        <i class="fas fa-star"></i>
+                                    </a>
+                                </div>
+
+                                {% if contact.phone %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-phone"></i> {{ contact.phone }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.email %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-envelope"></i> {{ contact.email }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.social_media %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-globe"></i> {{ contact.social_media }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.address %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-map-marker-alt"></i> {{ contact.address }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.notes %}
+                                <div class="notes-section">
+                                    <div class="notes-label">Notes:</div>
+                                    <div class="notes-content">{{ contact.notes }}</div>
+                                </div>
+                                {% endif %}
+
+                                <div class="button-group">
+                                    <a href="/edit_contact/{{ contact.id }}" class="btn btn-small">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="/delete_contact/{{ contact.id }}"
+                                       class="btn btn-small btn-danger"
+                                       onclick="return confirm('Delete this contact?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if regular_contacts %}
+                        {% if favorite_contacts %}
+                            <div class="regular-contacts-title">
+                                <i class="fas fa-users"></i> All Contacts ({{ regular_contacts|length }})
+                            </div>
+                        {% endif %}
+
+                        {% for contact in regular_contacts %}
+                            <div class="contact-card">
+                                <div class="contact-header">
+                                    <div class="contact-name">{{ contact.name }}</div>
+                                    <a href="/favorite/{{ contact.id }}" class="favorite-star" title="Add to favorites">
+                                        <i class="far fa-star"></i>
+                                    </a>
+                                </div>
+
+                                {% if contact.phone %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-phone"></i> {{ contact.phone }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.email %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-envelope"></i> {{ contact.email }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.social_media %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-globe"></i> {{ contact.social_media }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.address %}
+                                <div class="contact-detail">
+                                    <i class="fas fa-map-marker-alt"></i> {{ contact.address }}
+                                </div>
+                                {% endif %}
+
+                                {% if contact.notes %}
+                                <div class="notes-section">
+                                    <div class="notes-label">Notes:</div>
+                                    <div class="notes-content">{{ contact.notes }}</div>
+                                </div>
+                                {% endif %}
+
+                                <div class="button-group">
+                                    <a href="/edit_contact/{{ contact.id }}" class="btn btn-small">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="/delete_contact/{{ contact.id }}"
+                                       class="btn btn-small btn-danger"
+                                       onclick="return confirm('Delete this contact?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if not contacts %}
+                        <div class="empty-state">
+                            <i class="fas fa-address-book"></i>
+                            <h3>No Contacts Yet</h3>
+                            <p>Start by adding your first contact!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 第三栏：导入导出 -->
+            <div class="section-panel">
+                <h2><i class="fas fa-file-export"></i> Import & Export</h2>
+                <div class="import-export-panel">
+
+                    <!-- 导出功能 -->
+                    <div class="feature-item">
+                        <h3><i class="fas fa-download"></i> Export Contacts</h3>
+                        <p>Download all contacts as an Excel file</p>
+                        <form action="/export" method="GET">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-file-excel"></i> Export to Excel
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 导入功能 -->
+                    <div class="feature-item">
+                        <h3><i class="fas fa-upload"></i> Import Contacts</h3>
+                        <p>Upload an Excel file to add multiple contacts</p>
+                        <form action="/import" method="POST" enctype="multipart/form-data">
+                            <div class="file-upload">
+                                <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                                <p>Click to select Excel file</p>
+                                <input type="file" name="file" accept=".xlsx" required>
+                            </div>
+                            <button type="submit" class="btn">
+                                <i class="fas fa-file-import"></i> Import Contacts
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 文件格式说明 -->
+                    <div class="feature-item">
+                        <h3><i class="fas fa-info-circle"></i> File Format</h3>
+                        <p>Excel file should have these columns:</p>
+                        <ul style="color: #666; margin-left: 20px;">
+                            <li>Name (required)</li>
+                            <li>Phone</li>
+                            <li>Email</li>
+                            <li>Social Media</li>
+                            <li>Address</li>
+                            <li>Notes</li>
+                            <li>Favorite (optional)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- 结束布局 -->
+
+        <!-- Flash消息显示 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ 'success' if category == 'success' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
